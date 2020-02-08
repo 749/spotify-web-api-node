@@ -106,6 +106,21 @@ SpotifyWebApi.prototype = {
     }
   },
 
+  _splitParams: function(input, queryParamNames) {
+    var out = {
+      queryParams: {},
+      bodyParams: {}
+    };
+    for (var name in input) {
+      if (queryParamNames.includes(name)) {
+        out.queryParams[name] = input[name];
+      } else {
+        out.bodyParams[name] = input[name];
+      }
+    }
+    return out;
+  },
+
   /**
    * Look up a track.
    * @param {string} trackId The track's ID.
@@ -1099,20 +1114,12 @@ SpotifyWebApi.prototype = {
   play: function(options, callback) {
     /*jshint camelcase: false */
     var _options = options || {};
-    var queryParams = _options.device_id
-      ? { device_id: _options.device_id }
-      : null;
-    var postData = {};
-    ['context_uri', 'uris', 'offset'].forEach(function(field) {
-      if (field in _options) {
-        postData[field] = _options[field];
-      }
-    });
+    var params = this._splitParams(_options, ['device_id']);
     return WebApiRequest.builder(this.getAccessToken())
       .withPath('/v1/me/player/play')
-      .withQueryParameters(queryParams)
+      .withQueryParameters(params.queryParams)
       .withHeaders({ 'Content-Type': 'application/json' })
-      .withBodyParameters(postData)
+      .withBodyParameters(params.bodyParams)
       .build()
       .execute(HttpManager.put, callback);
   },
