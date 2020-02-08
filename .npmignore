@@ -3,4 +3,5 @@ __tests__
 node_modules
 .coveralls.yml
 .npmignore
+.travis.yml
 *.log
