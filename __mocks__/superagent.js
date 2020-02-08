@@ -46,6 +46,9 @@ var Request = {
   timeout() {
     return this;
   },
+  use() {
+    return this;
+  },
   end: jest.fn().mockImplementation(function(callback) {
     if (mockDelay) {
       this.delayTimer = setTimeout(callback, 0, mockError, mockResponse);

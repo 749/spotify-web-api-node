@@ -1,8 +1,15 @@
 'use strict';
 
 var superagent = require('superagent'),
+  Throttle = require('superagent-throttle'),
   WebApiError = require('./webapi-error');
 
+var throttle = new Throttle({
+  active: true, // set false to pause queue
+  rate: 10, // how many requests can be sent every `ratePer`
+  ratePer: 2000, // number of ms in which `rate` requests may be sent
+  concurrent: 2 // how many requests can be sent concurrently
+});
 var HttpManager = {};
 
 /* Create superagent options from the base request */
@@ -29,7 +36,7 @@ var _getParametersFromRequest = function(request) {
 };
 
 /* Create an error object from an error returned from the Web API */
-var _getErrorObject = function(defaultMessage, err) {
+var _getErrorObject = function(defaultMessage, err, response) {
   var errorObject;
   if (typeof err.error === 'object' && typeof err.error.message === 'string') {
     // Web API Error format
@@ -57,12 +64,16 @@ var _getErrorObject = function(defaultMessage, err) {
     errorObject = new WebApiError(defaultMessage + ': ' + JSON.stringify(err));
   }
 
+  errorObject.responseObject = response;
+
   return errorObject;
 };
 
 /* Make the request to the Web API */
 HttpManager._makeRequest = function(method, options, uri, callback) {
-  var req = method.bind(superagent)(uri);
+  var req = method.apply(superagent, [uri]);
+
+  req.use(throttle.plugin());
 
   if (options.query) {
     req.query(options.query);
@@ -84,9 +95,13 @@ HttpManager._makeRequest = function(method, options, uri, callback) {
 
   req.end(function(err, response) {
     if (err) {
-      var errorObject = _getErrorObject('Request error', {
-        error: err
-      });
+      var errorObject = _getErrorObject(
+        'Request error',
+        {
+          error: err
+        },
+        response
+      );
       return callback(errorObject);
     }
 
