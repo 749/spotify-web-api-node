@@ -1,5 +1,5 @@
 {
-  "name": "spotify-web-api-node",
+  "name": "@g749/spotify-web-api-node",
   "version": "4.1.0",
   "homepage": "https://github.com/749/spotify-web-api-node",
   "description": "A Node.js wrapper for Spotify's Web API",
@@ -8,7 +8,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/749/spotify-web-api-node.git"
+    "url": "git+https://github.com/749/spotify-web-api-node.git"
   },
   "dependencies": {
     "superagent": "^5.2.1",
@@ -46,5 +46,11 @@
   ],
   "browser": {
     "./src/server.js": "./src/client.js"
+  },
+  "bugs": {
+    "url": "https://github.com/749/spotify-web-api-node/issues"
+  },
+  "directories": {
+    "example": "examples"
   }
 }
